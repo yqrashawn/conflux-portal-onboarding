@@ -26,7 +26,7 @@
     "build": "rollup --config && rollup --config rollup.config.standalone.js"
   },
   "dependencies": {
-    "bowser": "^2.5.4"
+    "bowser": "^2.8.1"
   },
   "devDependencies": {
     "rollup": "^1.20.3",
