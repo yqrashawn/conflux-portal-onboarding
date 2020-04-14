@@ -3,7 +3,7 @@ export default {
   input: 'src/index.js',
   output: [
     {
-      file: 'dist/metamask-onboarding.cjs.js',
+      file: 'dist/conflux-portal-onboarding.cjs.js',
       format: 'cjs',
     },
   ],

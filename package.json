@@ -1,16 +1,16 @@
 {
-  "name": "@metamask/onboarding",
-  "version": "0.2.1",
-  "description": "Tools to support MetaMask one-click onboarding",
-  "main": "dist/metamask-onboarding.cjs.js",
+  "name": "conflux-portal-onboarding",
+  "version": "0.0.1",
+  "description": "Tools to support Conflux one-click onboarding",
+  "main": "dist/conflux-onboarding.cjs.js",
   "module": "src/index.js",
-  "homepage": "https://github.com/MetaMask/metamask-onboarding#readme",
+  "homepage": "https://github.com/yqrashawn/conflux-portal-onboarding#readme",
   "bugs": {
-    "url": "https://github.com/MetaMask/metamask-onboarding/issues"
+    "url": "https://github.com/yqrashawn/conflux-portal-onboarding/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/MetaMask/metamask-onboarding.git"
+    "url": "git+ssh://git@github.com/yqrashawn/conflux-portal-onboarding.git"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",

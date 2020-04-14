@@ -11,28 +11,19 @@ const ONBOARDING_STATE = {
 
 /** @enum {string} */
 const EXTENSION_DOWNLOAD_URL = {
-  CHROME: 'https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn',
-  FIREFOX: 'https://addons.mozilla.org/en-US/firefox/addon/ether-metamask/',
-  DEFAULT: 'https://metamask.io',
+  CHROME:
+    'https://chrome.google.com/webstore/detail/conflux-portal/opafkgfpaamecojfkaialabagfofilmg',
+  FIREFOX: 'https://addons.mozilla.org/en-US/firefox/addon/conflux-portal/',
+  DEFAULT: 'https://portal.conflux-chain.org',
+  GITHUB: 'https://github.com/Conflux-Chain/conflux-portal/releases',
 }
 
-/** @enum {string} */
-const FORWARDER_MODE = {
-  INJECT: 'INJECT',
-  OPEN_TAB: 'OPEN_TAB',
-}
-
-// sessionStorage key
-const REGISTRATION_IN_PROGRESS = 'REGISTRATION_IN_PROGRESS'
-
-// forwarder iframe id
-const FORWARDER_ID = 'FORWARDER_ID'
-
+// session storage key
+const ONBOARDING_IN_PROGRESS = 'ONBOARDING_IN_PROGRESS'
+const PORTAL_DOWNLOAD_URL = 'PORTAL_DOWNLOAD_URL'
 
 /**
  * @typedef {Object} OnboardingOptions - Options for configuring onboarding
- * @property {string} [forwarderOrigin] - The origin of the forwarder page
- * @property {string} [forwarderMode] - The method used for opening the forwarder ('TAB' or 'INJECT')
  */
 
 class Onboarding {
@@ -41,107 +32,65 @@ class Onboarding {
    *
    * @param {OnboardingOptions} [options] - Options for configuring onboarding
    */
-  constructor ({ forwarderOrigin = 'https://fwd.metamask.io', forwarderMode = FORWARDER_MODE.INJECT } = {}) {
-    this.forwarderOrigin = forwarderOrigin
-    this.forwarderMode = forwarderMode
-    this.state = Onboarding.isMetaMaskInstalled() ?
-      ONBOARDING_STATE.INSTALLED :
-      ONBOARDING_STATE.NOT_INSTALLED
+  constructor () {
+    this.state = Onboarding.isConfluxPortalInstalled()
+      ? ONBOARDING_STATE.INSTALLED
+      : ONBOARDING_STATE.NOT_INSTALLED
 
-    const browser = Onboarding._detectBrowser()
-    if (browser) {
-      this.downloadUrl = EXTENSION_DOWNLOAD_URL[browser]
-    } else {
-      this.downloadUrl = EXTENSION_DOWNLOAD_URL.DEFAULT
+    if (this.state === ONBOARDING_STATE.INSTALLED) {
+      return
     }
-
-    this._onMessage = this._onMessage.bind(this)
-    this._onMessageFromForwarder = this._onMessageFromForwarder.bind(this)
-    this._openForwarder = this._openForwarder.bind(this)
+    this.downloadUrl = this._getDownloadUrl()
+    this.downloadUrl.then((url) => {
+      this.downloadUrl = url
+      sessionStorage.setItem(PORTAL_DOWNLOAD_URL, url)
+    })
     this._openDownloadPage = this._openDownloadPage.bind(this)
     this.startOnboarding = this.startOnboarding.bind(this)
     this.stopOnboarding = this.stopOnboarding.bind(this)
-
-    window.addEventListener('message', this._onMessage)
-
-    if (forwarderMode === FORWARDER_MODE.INJECT && sessionStorage.getItem(REGISTRATION_IN_PROGRESS)) {
-      Onboarding._injectForwarder(this.forwarderOrigin)
-    }
   }
 
-  _onMessage (event) {
-    if (event.origin !== this.forwarderOrigin) {
-      // Ignoring non-forwarder message
-      return undefined
-    }
-
-    if (event.data.type === 'metamask:reload') {
-      return this._onMessageFromForwarder(event)
-    }
-
-    console.debug(`Unknown message from '${event.origin}' with data ${JSON.stringify(event.data)}`)
-    return undefined
-  }
-
-  async _onMessageFromForwarder (event) {
-    if (this.state === ONBOARDING_STATE.RELOADING) {
-      console.debug('Ignoring message while reloading')
-    } else if (this.state === ONBOARDING_STATE.NOT_INSTALLED) {
-      console.debug('Reloading now to register with MetaMask')
-      this.state = ONBOARDING_STATE.RELOADING
-      return location.reload()
-    } else if (this.state === ONBOARDING_STATE.INSTALLED) {
-      console.debug('Registering with MetaMask')
-      this.state = ONBOARDING_STATE.REGISTERING
-      await Onboarding._register()
-      this.state = ONBOARDING_STATE.REGISTERED
-      event.source.postMessage({ type: 'metamask:registrationCompleted' }, event.origin)
-      this.stopOnboarding()
-    } else if (this.state === ONBOARDING_STATE.REGISTERING) {
-      console.debug('Already registering - ignoring reload message')
-    } else if (this.state === ONBOARDING_STATE.REGISTERED) {
-      console.debug('Already registered - ignoring reload message')
-    } else {
-      throw new Error(`Unknown state: '${this.state}'`)
-    }
-    return undefined
+  getDownloadUrl () {
+    return Promise.resolve(this.downloadUrl)
   }
 
   /**
-   * Starts onboarding by opening the MetaMask download page and the Onboarding forwarder
+   * Starts onboarding by opening the ConfluxPortal download page
    */
   startOnboarding () {
-    sessionStorage.setItem(REGISTRATION_IN_PROGRESS, true)
+    if (sessionStorage.getItem(ONBOARDING_IN_PROGRESS)) {
+      return
+    }
+    sessionStorage.setItem(ONBOARDING_IN_PROGRESS, true)
     this._openDownloadPage()
-    this._openForwarder()
-  }
-
-  /**
-   * Stops onboarding registration, including removing the injected forwarder (if any)
-   *
-   * Typically this function is not necessary, but it can be useful for cases where
-   * onboarding completes before the forwarder has registered.
-   */
-  stopOnboarding () {
-    if (sessionStorage.getItem(REGISTRATION_IN_PROGRESS)) {
-      if (this.forwarderMode === FORWARDER_MODE.INJECT) {
-        console.debug('Removing forwarder')
-        Onboarding._removeForwarder()
-      }
-      sessionStorage.setItem(REGISTRATION_IN_PROGRESS, false)
-    }
-  }
-
-  _openForwarder () {
-    if (this.forwarderMode === FORWARDER_MODE.OPEN_TAB) {
-      window.open(this.forwarderOrigin, '_blank')
-    } else {
-      Onboarding._injectForwarder(this.forwarderOrigin)
-    }
+    sessionStorage.setItem(ONBOARDING_IN_PROGRESS, false)
   }
 
   _openDownloadPage () {
-    window.open(this.downloadUrl, '_blank')
+    this.getDownloadUrl().then((url) => window.open(url, '_blank'))
+  }
+
+  /**
+   * get the right download url depends on users' client
+   */
+  async _getDownloadUrl () {
+    if (this.downloadUrl) {
+      return this.downloadUrl
+    }
+
+    const downloadUrlInSessionStorage = sessionStorage.getItem(
+      PORTAL_DOWNLOAD_URL,
+    )
+    if (downloadUrlInSessionStorage) {
+      return downloadUrlInSessionStorage
+    }
+
+    const browser = await Onboarding._detectBrowser()
+    if (browser) {
+      return EXTENSION_DOWNLOAD_URL[browser]
+    }
+    return EXTENSION_DOWNLOAD_URL.DEFAULT
+
   }
 
   /**
@@ -149,36 +98,37 @@ class Onboarding {
    *
    * @returns {boolean} - `true` if MetaMask is installed, `false` otherwise.
    */
-  static isMetaMaskInstalled () {
-    return Boolean(window.ethereum && window.ethereum.isMetaMask)
+  static isConfluxPortalInstalled () {
+    return Boolean(window.conflux && window.conflux.isConfluxPortal)
   }
 
-  static _register () {
-    return window.ethereum.send('wallet_registerOnboarding')
-  }
-
-  static _injectForwarder (forwarderOrigin) {
-    const container = document.body
-    const iframe = document.createElement('iframe')
-    iframe.setAttribute('height', 0)
-    iframe.setAttribute('width', 0)
-    iframe.setAttribute('src', forwarderOrigin)
-    iframe.setAttribute('id', FORWARDER_ID)
-    container.insertBefore(iframe, container.children[0])
-  }
-
-  static _removeForwarder () {
-    document.getElementById(FORWARDER_ID).remove()
-  }
-
-  static _detectBrowser () {
+  static async _detectBrowser () {
     const browserInfo = Bowser.parse(window.navigator.userAgent)
     if (browserInfo.browser.name === 'Firefox') {
       return 'FIREFOX'
-    } else if (['Chrome', 'Chromium'].includes(browserInfo.browser.name)) {
+    } else if (
+      ['Chrome', 'Chromium'].includes(browserInfo.browser.name) &&
+      (await Onboarding._canAccessChromeWebStore())
+    ) {
       return 'CHROME'
     }
-    return null
+
+    if (
+      location.host === 'portal.conflux-chain.org' ||
+      location.host === 'portal.confluxnetwork.org'
+    ) {
+      return 'GITHUB'
+    }
+    return 'DEFAULT'
+  }
+
+  static _canAccessChromeWebStore () {
+    return new Promise((resolve) => {
+      setTimeout(() => resolve(false), 3000)
+      fetch(EXTENSION_DOWNLOAD_URL.CHROME, { mode: 'cors' })
+        .then(() => resolve(true))
+        .catch(() => resolve(true))
+    })
   }
 }
 
