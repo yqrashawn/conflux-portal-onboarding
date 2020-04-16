@@ -32,7 +32,7 @@ class Onboarding {
    *
    * @param {OnboardingOptions} [options] - Options for configuring onboarding
    */
-  constructor () {
+  constructor ({ noInject = false }) {
     this.state = Onboarding.isConfluxPortalInstalled()
       ? ONBOARDING_STATE.INSTALLED
       : ONBOARDING_STATE.NOT_INSTALLED
@@ -40,6 +40,11 @@ class Onboarding {
     if (this.state === ONBOARDING_STATE.INSTALLED) {
       return
     }
+
+    if (!noInject) {
+      this._injectFakePortal()
+    }
+
     this.downloadUrl = this._getDownloadUrl()
     this.downloadUrl.then((url) => {
       this.downloadUrl = url
@@ -48,6 +53,10 @@ class Onboarding {
     this._openDownloadPage = this._openDownloadPage.bind(this)
     this.startOnboarding = this.startOnboarding.bind(this)
     this.stopOnboarding = this.stopOnboarding.bind(this)
+  }
+
+  _injectFakePortal () {
+    window.conflux = { enalbe: this.startOnboarding }
   }
 
   getDownloadUrl () {
@@ -90,7 +99,6 @@ class Onboarding {
       return EXTENSION_DOWNLOAD_URL[browser]
     }
     return EXTENSION_DOWNLOAD_URL.DEFAULT
-
   }
 
   /**
