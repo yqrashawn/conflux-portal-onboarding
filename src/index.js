@@ -125,6 +125,8 @@ class Onboarding {
       location.host === 'portal.conflux-chain.org' ||
       location.host === 'portal.confluxnetwork.org'
     ) {
+      // eslint-disable-next-line no-empty-function
+      EXTENSION_DOWNLOAD_URL.GITHUB = await Onboarding._getGithubReleaseUrl().catch(() => {})
       return 'GITHUB'
     }
     return 'DEFAULT'
@@ -137,6 +139,47 @@ class Onboarding {
         .then(() => resolve(true))
         .catch(() => resolve(true))
     })
+  }
+
+  static async _getGithubReleaseUrl ({ browser, version = 'LATEST' }) {
+    // 'Firefox', 'Chrome', 'Chromium'
+    const userBrowser =
+      browser || Bowser.parse(window.navigator.userAgent).browser.name
+    const b = userBrowser.toLowerCase().includes('firefox')
+      ? 'firefox'
+      : 'chrom'
+    if (version !== 'latest' && (/^\d{1,2}\.\d{1,2}\.\d{1,2}$/u).test(version)) {
+      throw new Error(
+        `Invalid version number: ${version}, version number should be LATEST or "*.*.*" where "*" should be number`,
+      )
+    }
+
+    const releasesRes = await fetch(
+      'https://api.github.com/repos/Conflux-Chain/conflux-portal/releases',
+      { mode: 'cors' },
+    )
+    if (!releasesRes.ok) {
+      throw new Error('Error getting release info from github.')
+    }
+    const releases = await releasesRes.json()
+    const rightVersion =
+      version === 'LATEST'
+        ? releases[0]
+        : releases.find(({ tag_name: tagName }) => tagName.includes(version))
+
+    if (!rightVersion || !rightVersion.assets || !rightVersion.assets.length) {
+      throw new Error(
+        `Invalid version number, there's no version ${version} or there's no assets under that version of release`,
+      )
+    }
+    const rightAsset = rightVersion.assets.find(({ browser_download_url: browserDownloadUrl }) => browserDownloadUrl.includes(b))
+    if (!rightAsset) {
+      throw new Error(
+        `Invalid version numver, there's no asked assets in release ${version}`,
+      )
+    }
+
+    return rightAsset.browser_download_url
   }
 }
 
