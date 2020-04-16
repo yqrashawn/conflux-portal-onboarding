@@ -29,8 +29,11 @@ const PORTAL_DOWNLOAD_URL = 'PORTAL_DOWNLOAD_URL'
 class Onboarding {
 
   /**
+   * Create a onboarding instance, it will inject a fake window.conflux.enalbe
+   * portal api, if portal is not installed. Calling the api will open a web
+   * page help the user to install ConfluxPortal
    *
-   * @param {OnboardingOptions} [options] - Options for configuring onboarding
+   * @param {noInject} [boolean] don't inject the fake portal api
    */
   constructor ({ noInject = false }) {
     this.state = Onboarding.isConfluxPortalInstalled()
@@ -52,7 +55,6 @@ class Onboarding {
     })
     this._openDownloadPage = this._openDownloadPage.bind(this)
     this.startOnboarding = this.startOnboarding.bind(this)
-    this.stopOnboarding = this.stopOnboarding.bind(this)
   }
 
   _injectFakePortal () {
@@ -180,6 +182,13 @@ class Onboarding {
     }
 
     return rightAsset.browser_download_url
+  }
+
+  /**
+   * open portal.conflux-chain.org page
+   */
+  static openPortalSite () {
+    window.open(EXTENSION_DOWNLOAD_URL.DEFAULT, '_blank')
   }
 }
 
