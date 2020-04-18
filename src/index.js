@@ -125,7 +125,8 @@ class Onboarding {
 
     if (
       location.host === 'portal.conflux-chain.org' ||
-      location.host === 'portal.confluxnetwork.org'
+        location.host === 'portal.confluxnetwork.org' ||
+        window.FAKE_PORTAL_SITE
     ) {
       // eslint-disable-next-line no-empty-function
       EXTENSION_DOWNLOAD_URL.GITHUB = await Onboarding._getGithubReleaseUrl().catch(() => {})
@@ -134,16 +135,16 @@ class Onboarding {
     return 'DEFAULT'
   }
 
-  static _canAccessChromeWebStore () {
+  static _canAccessChromeWebStore (tolerance = 3000) {
     return new Promise((resolve) => {
-      setTimeout(() => resolve(false), 3000)
+      setTimeout(() => resolve(false), tolerance)
       fetch(EXTENSION_DOWNLOAD_URL.CHROME, { mode: 'cors' })
         .then(() => resolve(true))
         .catch(() => resolve(true))
     })
   }
 
-  static async _getGithubReleaseUrl ({ browser, version = 'LATEST' }) {
+  static async _getGithubReleaseUrl ({ browser, version = 'LATEST' } = {}) {
     // 'Firefox', 'Chrome', 'Chromium'
     const userBrowser =
       browser || Bowser.parse(window.navigator.userAgent).browser.name
