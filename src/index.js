@@ -104,9 +104,9 @@ class Onboarding {
   }
 
   /**
-   * Checks whether the MetaMask extension is installed
+   * Checks whether the ConfluxPortal extension is installed
    *
-   * @returns {boolean} - `true` if MetaMask is installed, `false` otherwise.
+   * @returns {boolean} - `true` if ConfluxPortal is installed, `false` otherwise.
    */
   static isConfluxPortalInstalled () {
     return Boolean(window.conflux && window.conflux.isConfluxPortal)
