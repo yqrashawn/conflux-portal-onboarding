@@ -78,12 +78,20 @@ Here is an example of an onboarding button that uses this library:
 
 ### Instance methods
 
-- `getDownloadUrl` return a `Promise` contains the ConfluxPortal download url
-  depending on user's browser and network state
-- `startOnboarding` open the from `getDownloadUrl`
+- `getDownloadUrl` Return a `Promise` contains the ConfluxPortal download url
+  depending on user's browser and network states
+- `startOnboarding` Open the page from `getDownloadUrl`
+- `injectFakePortal` Inject a fake window.conflux.enable api if portal not
+  installed. calling this api will open a new download page depending on user's
+  browser and network states
 
-### Inject fake ConfluxPortal api
+### About the download url
 
-Create the onboarding instance with `new ConfluxPortalOnboarding()` will inject
-a `window.conflux.enable` api into the current page if ConfluxPortal is not
-installed. Calling the api is same as calling `startOnboarding`.
+In order to detect users' network states. Any api involving the download url is
+async. If the api is a pure function, it will return a promise that resolves to
+the desired result once the detection finishes. If the api is a function with
+side effects, the side effects will be executed once the detection finishes. The
+detection starts when `new ConfluxPortalOnboarding()` is called.
+
+- `getDownloadUrl` is pure function
+- `window.conflux.enable` and `startOnboarding` are functions with side effects.
