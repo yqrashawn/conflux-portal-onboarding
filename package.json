@@ -1,6 +1,6 @@
 {
   "name": "conflux-portal-onboarding",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Tools to support Conflux one-click onboarding",
   "main": "dist/conflux-onboarding.cjs.js",
   "module": "src/index.js",

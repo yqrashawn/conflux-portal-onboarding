@@ -159,7 +159,7 @@ class Onboarding {
       throw new Error(`Invalid version number: ${version}, version number should be like "0.1.4"`)
     }
 
-    if (browser !== 'chrome' && browser !== 'firefox') {
+    if (browser && browser !== 'chrome' && browser !== 'firefox') {
       throw new Error(`Invalid browser: ${browser}, can only be "chrome" or "firefox"`)
     }
 
