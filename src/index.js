@@ -135,11 +135,12 @@ class Onboarding {
     ) {
       if (cachedPortalVersion) {
         EXTENSION_DOWNLOAD_URL.GITHUB = Onboarding.getZipUrl({ version: cachedPortalVersion })
+      } else {
+        // eslint-disable-next-line no-empty-function
+        EXTENSION_DOWNLOAD_URL.GITHUB = await Onboarding._getGithubReleaseUrl().catch(
+          () => {},
+        )
       }
-      // eslint-disable-next-line no-empty-function
-      EXTENSION_DOWNLOAD_URL.GITHUB = await Onboarding._getGithubReleaseUrl().catch(
-        () => {},
-      )
       return 'GITHUB'
     }
     return 'DEFAULT'
@@ -169,7 +170,7 @@ class Onboarding {
       ? 'firefox'
       : 'chrome'
     // https://github.com/Conflux-Chain/conflux-portal/releases/download/v0.1.4/conflux-portal-chrome-0.1.4.zip
-    return `https://github.com/Conflux-Chain/conflux-portal/releases/download/v${version}/conflux-portal-${b}-${version}.zip`
+    return `https://github.com/Conflux-Chain/conflux-portal/releases/download/v${version}/conflux-portal-${b.toLowerCase()}-${version}.zip`
   }
 
   static async _getGithubReleaseUrl ({ browser, version = 'LATEST' } = {}) {
