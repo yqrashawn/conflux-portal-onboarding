@@ -35,9 +35,10 @@ class Onboarding {
   constructor({
     ignoreSessionStorage = false,
     cachedPortalVersion,
-    customUrl,
+    alioss,
   } = {}) {
     this._cachedPortalVersion = cachedPortalVersion
+    this._alioss = alioss
     this._ignoreSessionStorage = ignoreSessionStorage
     this.state = Onboarding.isConfluxPortalInstalled()
       ? ONBOARDING_STATE.INSTALLED
@@ -105,7 +106,10 @@ class Onboarding {
       return downloadUrlInSessionStorage
     }
 
-    const browser = await Onboarding._detectBrowser(this._cachedPortalVersion)
+    const browser = await Onboarding._detectBrowser(
+      this._cachedPortalVersion,
+      this._alioss
+    )
     if (browser) {
       return EXTENSION_DOWNLOAD_URL[browser]
     }
