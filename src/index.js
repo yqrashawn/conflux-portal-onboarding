@@ -141,7 +141,7 @@ class Onboarding {
       location.host === "portal.confluxnetwork.org" ||
       window.FAKE_PORTAL_SITE
     ) {
-      if (alisoss && cachedPortalVersion) {
+      if (alioss && cachedPortalVersion) {
         EXTENSION_DOWNLOAD_URL.ALIOSS = Onboarding.getZipUrl({
           version: cachedPortalVersion,
           alioss,
@@ -192,7 +192,7 @@ class Onboarding {
       ? "firefox"
       : "chrome"
     // https://github.com/Conflux-Chain/conflux-portal/releases/download/v0.1.4/conflux-portal-chrome-0.1.4.zip
-    if (alisoss)
+    if (alioss)
       return `https://conflux-soft.oss-cn-beijing.aliyuncs.com/portal/conflux-portal-${b.toLowerCase()}-${version}.zip`
     return `https://github.com/Conflux-Chain/conflux-portal/releases/download/v${version}/conflux-portal-${b.toLowerCase()}-${version}.zip`
   }
