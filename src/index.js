@@ -12,7 +12,7 @@ const ONBOARDING_STATE = {
 /** @enum {string} */
 const EXTENSION_DOWNLOAD_URL = {
   CHROME:
-    "https://chrome.google.com/webstore/detail/conflux-portal/opafkgfpaamecojfkaialabagfofilmg",
+    "https://chrome.google.com/webstore/detail/conflux-portal/niolbdhdcdmajjbbmlempncpbbgphhjb",
   FIREFOX: "https://addons.mozilla.org/en-US/firefox/addon/conflux-portal/",
   DEFAULT: "https://portal.conflux-chain.org",
   GITHUB: "https://github.com/Conflux-Chain/conflux-portal/releases",
